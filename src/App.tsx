@@ -23,10 +23,6 @@ import { useDropzone } from "react-dropzone";
 import axios, { AxiosResponse } from "axios";
 
 type Base64 = string | ArrayBuffer | null;
-interface IFileBase64 {
-  readonly name: string;
-  readonly data64: Base64;
-}
 
 interface ServerResponse {
   data: ServerData;
@@ -95,7 +91,7 @@ const toBase64 = (file: File) =>
 
 const App: FunctionComponent<{}> = () => {
   const classes = useStyles();
-  const [filesB64, setfilesB64] = React.useState<IFileBase64[]>([]);
+  const [filesB64, setfilesB64] = React.useState<Base64[]>([]);
   const [filesVisual, setFilesVisual] = React.useState<File[]>([]);
   const [disabled, setDisabled] = React.useState<boolean>(false);
   const [numCfdis, setNumCfdis] = React.useState<number>(0);
@@ -106,13 +102,7 @@ const App: FunctionComponent<{}> = () => {
     setfilesB64(
       await Promise.all(
         acceptedFiles.map(
-          async (file: File): Promise<IFileBase64> => {
-            let newIFile: IFileBase64 = {
-              name: file.name.substring(0, file.name.lastIndexOf(".")),
-              data64: await toBase64(file),
-            };
-            return newIFile;
-          }
+          async (file: File): Promise<Base64> => await toBase64(file)
         )
       )
     );
@@ -134,15 +124,13 @@ const App: FunctionComponent<{}> = () => {
           files: filesB64,
         }
       );
-
-      console.log(response.data);
-
       setNumCfdis(response.data.data.cfdisInsertados);
     } catch (error) {
       console.log(error);
+    } finally {
+      setOpen(true);
+      setDisabled(false);
     }
-    setOpen(true);
-    setDisabled(false);
   };
 
   return (
@@ -163,95 +151,91 @@ const App: FunctionComponent<{}> = () => {
           <Button color="inherit">GUGH791023DD0</Button>
         </Toolbar>
       </AppBar>
-      <div style={{ padding: 20 }}>
-        <Grid
-          container
-          spacing={3}
-          direction="row"
-          justify="center"
-          alignItems="center"
-        >
-          <Grid item lg={8} md={8} sm={8}>
-            <h1>Importar datos</h1>
-          </Grid>
-          <Grid item lg={8} md={8} sm={8}>
-            <Card>
-              <CardContent>
-                <h4>Seleccionar únicamente los archivos ZIP</h4>
-                <div {...getRootProps()} className={classes.cardDrag}>
-                  <input {...getInputProps()} />
-                  <p>
-                    Arrastre los archivos aquí, o click para seleccionarlos.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item lg={8} md={8} sm={8}>
-            <Card>
-              <CardContent>
-                <Typography
-                  className={classes.title}
-                  color="textSecondary"
-                  gutterBottom
-                >
-                  Lista de archivos ZIP
-                </Typography>
-                <List>
-                  {filesVisual.map((file: File, index: number) => (
-                    <ListItem key={index} button>
-                      <ListItemText
-                        primary={file.name}
-                        secondary={`${Math.round(
-                          file.size / Math.pow(1024, 1)
-                        )} KB`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  onClick={sendData}
-                  endIcon={<Icon>send</Icon>}
-                  fullWidth={true}
-                  disabled={disabled}
-                >
-                  Importar
-                </Button>
-                <Modal
-                  aria-labelledby="transition-modal-title"
-                  aria-describedby="transition-modal-description"
-                  className={classes.modal}
-                  open={open}
-                  onClose={() => setOpen(false)}
-                  closeAfterTransition
-                  BackdropComponent={Backdrop}
-                  BackdropProps={{
-                    timeout: 500,
-                  }}
-                >
-                  <Fade in={open}>
-                    <div className={classes.paper}>
-                      <h2 id="transition-modal-title">Transition modal</h2>
-                      <p id="transition-modal-description">
-                        react-transition-group animates me.
-                      </p>
-                    </div>
-                  </Fade>
-                </Modal>
-              </CardContent>
-            </Card>
-            <br />
-            {disabled && (
-              <div className={classes.loading}>
-                <LinearProgress />
-              </div>
-            )}
-          </Grid>
+      <Grid
+        container
+        spacing={3}
+        direction="row"
+        justify="center"
+        alignItems="center"
+      >
+        <Grid item lg={8} md={8} sm={8}>
+          <h1>Importar datos</h1>
         </Grid>
-      </div>
+        <Grid item lg={8} md={8} sm={8}>
+          <Card>
+            <CardContent>
+              <h4>Seleccionar únicamente los archivos ZIP</h4>
+              <div {...getRootProps()} className={classes.cardDrag}>
+                <input {...getInputProps()} />
+                <p>Arrastre los archivos aquí, o click para seleccionarlos.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item lg={8} md={8} sm={8}>
+          <Card>
+            <CardContent>
+              <Typography
+                className={classes.title}
+                color="textSecondary"
+                gutterBottom
+              >
+                Lista de archivos ZIP
+              </Typography>
+              <List>
+                {filesVisual.map((file: File, index: number) => (
+                  <ListItem key={index} button>
+                    <ListItemText
+                      primary={file.name}
+                      secondary={`${Math.round(
+                        file.size / Math.pow(1024, 1)
+                      )} KB`}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                onClick={sendData}
+                endIcon={<Icon>send</Icon>}
+                fullWidth={true}
+                disabled={disabled}
+              >
+                Importar
+              </Button>
+              <Modal
+                aria-labelledby="transition-modal-title"
+                aria-describedby="transition-modal-description"
+                className={classes.modal}
+                open={open}
+                onClose={() => setOpen(false)}
+                closeAfterTransition
+                BackdropComponent={Backdrop}
+                BackdropProps={{
+                  timeout: 500,
+                }}
+              >
+                <Fade in={open}>
+                  <div className={classes.paper}>
+                    <h2 id="transition-modal-title">Importar archivio ZIP</h2>
+                    <p id="transition-modal-description">
+                      Se insertaron {numCfdis} archivos XML correctamente.
+                    </p>
+                  </div>
+                </Fade>
+              </Modal>
+            </CardContent>
+          </Card>
+          <br />
+          {disabled && (
+            <div className={classes.loading}>
+              <LinearProgress />
+            </div>
+          )}
+        </Grid>
+      </Grid>
     </Fragment>
   );
 };
