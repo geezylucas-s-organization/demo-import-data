@@ -1,7 +1,7 @@
 import React, { Fragment } from "react";
 import clsx from "clsx";
-import { NavLink, withRouter, RouteComponentProps } from "react-router-dom";
-import { Routes, RouteType } from "./Routes";
+import { Link, withRouter, RouteComponentProps } from "react-router-dom";
+import { RoutesPrivate, RouteType } from "./Routes";
 import {
   createStyles,
   makeStyles,
@@ -65,12 +65,14 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-interface IProps extends RouteComponentProps {
+interface INavBarPrivateProps extends RouteComponentProps {
   open: boolean;
   setOpen: (active: boolean) => void;
 }
 
-const NavigationBar: React.FC<IProps> = (props: IProps) => {
+const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
+  props: INavBarPrivateProps
+) => {
   const classes = useStyles();
   const theme = useTheme<Theme>();
 
@@ -129,23 +131,20 @@ const NavigationBar: React.FC<IProps> = (props: IProps) => {
         </div>
         <Divider />
         <List>
-          {Routes.map((prop: RouteType, key: number) => {
-            return (
-              <NavLink
-                to={prop.path}
-                style={{ textDecoration: "none" }}
-                key={key}
-              >
-                <ListItem selected={activeRoute(prop.path)}>
-                  <ListItemText primary={prop.sidebarName} />
-                </ListItem>
-              </NavLink>
-            );
-          })}
+          {RoutesPrivate.map((prop: RouteType, index: number) => (
+            <ListItem
+              component={Link}
+              to={prop.path}
+              key={index}
+              selected={activeRoute(prop.path)}
+            >
+              <ListItemText primary={prop.sidebarName} />
+            </ListItem>
+          ))}
         </List>
       </Drawer>
     </Fragment>
   );
 };
 
-export default withRouter(NavigationBar);
+export default withRouter(NavigationBarPrivate);

@@ -1,14 +1,35 @@
 import React, { useState } from "react";
 import clsx from "clsx";
-import { Switch, Route } from "react-router-dom";
-import { Routes, RouteType } from "./router/Routes";
-import NavigationBar, { drawerWidth } from "./router/NavigationBar";
+import {
+  Switch,
+  Route,
+  Redirect,
+  RouteProps,
+  RouteComponentProps,
+} from "react-router-dom";
+import { RoutesPrivate, RoutesPublic, RouteType } from "./router/Routes";
+import NavigationBarPrivate, {
+  drawerWidth,
+} from "./router/NavigationBarPrivate";
+import NavigationBarPublic from "./router/NavigationBarPublic";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+
+import { connect, MapStateToProps } from "react-redux";
+import { AppState } from "./store";
+import { IUserState } from "./store/user/types";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       display: "flex",
+    },
+    contentPublic: {
+      flexGrow: 1,
+      padding: theme.spacing(3),
+      transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen,
+      }),
     },
     content: {
       flexGrow: 1,
@@ -37,15 +58,76 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-const App: React.FC = () => {
+interface IAppStateProps {
+  user: IUserState;
+}
+
+const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
   const classes = useStyles();
   const [open, setOpen] = useState<boolean>(false);
 
+  const PrivateRoute: React.FC<RouteProps> = ({
+    component,
+    ...rest
+  }: RouteProps) => (
+    <Route
+      {...rest}
+      render={(props: RouteComponentProps) =>
+        user.isAuth ? (
+          <Route {...props} component={component} />
+        ) : (
+          <Redirect to="/signin" />
+        )
+      }
+    />
+  );
+
+  const PublicRoute: React.FC<RouteProps> = ({
+    component,
+    ...rest
+  }: RouteProps) => (
+    <Route
+      {...rest}
+      render={(props: RouteComponentProps) =>
+        !user.isAuth ? (
+          <Route {...props} component={component} />
+        ) : (
+          <Redirect to="/" />
+        )
+      }
+    />
+  );
+
+  if (!user.isAuth) {
+    return (
+      <div className={classes.root}>
+        <NavigationBarPublic />
+        <Switch>
+          {RoutesPublic.map((route: RouteType) => (
+            <Route exact path={route.path} key={route.path}>
+              <main className={classes.contentPublic}>
+                <div className={classes.drawerHeader} />
+                <PublicRoute component={route.component} path={route.path} />
+              </main>
+            </Route>
+          ))}
+          {RoutesPrivate.map((route: RouteType, index: number) => (
+            <PrivateRoute
+              component={route.component}
+              path={route.path}
+              key={index}
+            />
+          ))}
+        </Switch>
+      </div>
+    );
+  }
+
   return (
     <div className={classes.root}>
-      <NavigationBar open={open} setOpen={setOpen} />
+      <NavigationBarPrivate open={open} setOpen={setOpen} />
       <Switch>
-        {Routes.map((route: RouteType) => (
+        {RoutesPrivate.map((route: RouteType) => (
           <Route exact path={route.path} key={route.path}>
             <main
               className={clsx(classes.content, {
@@ -53,13 +135,29 @@ const App: React.FC = () => {
               })}
             >
               <div className={classes.drawerHeader} />
-              <route.component />
+              <PrivateRoute component={route.component} path={route.path} />
             </main>
           </Route>
+        ))}
+        {RoutesPublic.map((route: RouteType, index: number) => (
+          <PublicRoute
+            component={route.component}
+            path={route.path}
+            key={index}
+          />
         ))}
       </Switch>
     </div>
   );
 };
 
-export default App;
+const mapStateToProps: MapStateToProps<IAppStateProps, {}, AppState> = (
+  state: AppState
+): IAppStateProps => ({
+  user: state.user,
+});
+
+export default connect<IAppStateProps, {}, {}, AppState>(
+  mapStateToProps,
+  {}
+)(App);
