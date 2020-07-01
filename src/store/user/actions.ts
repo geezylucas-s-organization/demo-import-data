@@ -1,37 +1,44 @@
 import axios, { AxiosResponse } from "axios";
-import { AppState } from "../index";
-import { ActionCreator, Action, Dispatch } from "redux";
+import { Dispatch } from "redux";
+import { IUser, LOGIN, ILoginAction, IUsersCredentials } from "./types";
+import { ActionCreator } from "redux";
 import { ThunkAction } from "redux-thunk";
-import { IAccessCredentials, IUser, LOGIN, FETCH_ERROR } from "./types";
-
-export type AppThunk = ActionCreator<
-  ThunkAction<void, AppState, null, Action<string>>
->;
 
 interface ServerResponseLogin {
   data: IUser;
 }
 
-export const login: AppThunk = (user: IAccessCredentials) => {
+export const login: ActionCreator<ThunkAction<
+  // The type of the last action to be dispatched - will always be promise<T> for async actions
+  Promise<ILoginAction>,
+  // The type for the data within the last action
+  IUser,
+  // The type of the parameter for the nested function
+  IUsersCredentials,
+  // The type of the last action to be dispatched
+  ILoginAction
+>> = ({ email, password }: IUsersCredentials) => {
   return async (dispatch: Dispatch) => {
     try {
       const response: AxiosResponse<ServerResponseLogin> = await axios.post(
         "http://127.0.0.1:5000/api/users/login",
         {
-          email: user.email,
-          password: user.password,
+          email,
+          password,
         }
       );
-      dispatch({
+      const loginAction: ILoginAction = {
         type: LOGIN,
         payload: response.data.data,
-      });
+      };
+      return dispatch(loginAction);
     } catch (error) {
       console.log(error);
-      return dispatch({
-        type: FETCH_ERROR,
-        payload: error,
-      });
+      const loginAction: ILoginAction = {
+        type: LOGIN,
+        payload: undefined,
+      };
+      return dispatch(loginAction);
     }
   };
 };

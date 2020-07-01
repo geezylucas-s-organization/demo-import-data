@@ -18,6 +18,7 @@ import {
   ListItem,
   ListItemText,
   Divider,
+  Button,
 } from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
@@ -61,6 +62,9 @@ const useStyles = makeStyles((theme: Theme) =>
       // necessary for content to be below app bar
       ...theme.mixins.toolbar,
       justifyContent: "flex-end",
+    },
+    title: {
+      flexGrow: 1,
     },
   })
 );
@@ -106,9 +110,10 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap>
+          <Typography variant="h6" className={classes.title}>
             Faccloud
           </Typography>
+          <Button color="inherit">Cerrar sesión</Button>
         </Toolbar>
       </AppBar>
       <Drawer

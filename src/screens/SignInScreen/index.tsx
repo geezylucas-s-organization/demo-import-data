@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Avatar,
@@ -15,6 +15,11 @@ import {
 } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import { makeStyles } from "@material-ui/core/styles";
+
+import { connect } from "react-redux";
+import { login } from "../../store/user/actions";
+import { IUsersCredentials, ILoginAction, IUser } from "../../store/user/types";
+import { ThunkDispatch } from "redux-thunk";
 
 const Copyright = (): JSX.Element => {
   return (
@@ -49,8 +54,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const SignInScreen: React.FC = () => {
+interface IDispatchProps {
+  loginAsync: (credentials: IUsersCredentials) => Promise<ILoginAction>;
+}
+
+type ISignInProps = IDispatchProps;
+
+const SignInScreen: React.FC<ISignInProps> = (props: ISignInProps) => {
   const classes = useStyles();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+
+  const login = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const credentials: IUsersCredentials = {
+        email,
+        password,
+      };
+      await props.loginAsync(credentials);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Container maxWidth="xs">
@@ -62,8 +88,9 @@ const SignInScreen: React.FC = () => {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} noValidate>
+        <form className={classes.form} onSubmit={login} noValidate>
           <TextField
+            value={email}
             variant="outlined"
             margin="normal"
             required
@@ -73,8 +100,12 @@ const SignInScreen: React.FC = () => {
             name="email"
             autoComplete="email"
             autoFocus
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setEmail(e.target.value)
+            }
           />
           <TextField
+            value={password}
             variant="outlined"
             margin="normal"
             required
@@ -84,6 +115,9 @@ const SignInScreen: React.FC = () => {
             type="password"
             id="password"
             autoComplete="current-password"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
           />
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
@@ -119,27 +153,16 @@ const SignInScreen: React.FC = () => {
   );
 };
 
-export default SignInScreen;
+const mapDispatchToProps = (
+  dispatch: ThunkDispatch<IUser, IUsersCredentials, ILoginAction>
+): IDispatchProps => {
+  return {
+    loginAsync: (credentials: IUsersCredentials) =>
+      dispatch(login(credentials)),
+  };
+};
 
-// const Login: React.FC<RouteComponentProps> = (props: RouteComponentProps) => {
-//   const [redirectToReferrer, setRedirectToReferrer] = React.useState<boolean>(
-//     false
-//   );
-//   const login = () => {
-//     fakeAuth.authenticate(() => {
-//       setRedirectToReferrer(true);
-//     });
-//   };
-//   const from = props.location.state || { from: { pathname: "/" } };
-
-//   if (redirectToReferrer === true) {
-//     return <Redirect to={from} />;
-//   }
-
-//   return (
-//     <div>
-//       <p>You must log in to view the page</p>
-//       <button onClick={login}>Log in</button>
-//     </div>
-//   );
-// };
+export default connect<{}, IDispatchProps, {}>(
+  undefined,
+  mapDispatchToProps
+)(SignInScreen);

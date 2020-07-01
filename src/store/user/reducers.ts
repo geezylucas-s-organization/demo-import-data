@@ -1,10 +1,9 @@
 import { Reducer } from "redux";
-import { IUserState, UserActionTypes, LOGIN, FETCH_ERROR } from "./types";
+import { IUserState, UserActionTypes, LOGIN } from "./types";
 
 const initialState: IUserState = {
   isAuth: false,
   userData: undefined,
-  errors: undefined,
 };
 
 export const userReducer: Reducer<IUserState, UserActionTypes> = (
@@ -13,10 +12,11 @@ export const userReducer: Reducer<IUserState, UserActionTypes> = (
 ): IUserState => {
   switch (action.type) {
     case LOGIN:
-      return { ...action.payload, isAuth: true };
-    case FETCH_ERROR: {
-      return { ...state, errors: action.payload };
-    }
+      if (action.payload !== undefined) {
+        return { ...action.payload, isAuth: true };
+      } else {
+        return { isAuth: false };
+      }
     default:
       return state;
   }
