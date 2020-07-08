@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Avatar,
@@ -12,14 +12,19 @@ import {
   Link,
   Typography,
   Container,
+  Backdrop,
+  CircularProgress,
 } from "@material-ui/core";
+import Alert from "@material-ui/lab/Alert";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import { makeStyles } from "@material-ui/core/styles";
 
-import { connect } from "react-redux";
-import { login } from "../../store/user/actions";
-import { IUsersCredentials, ILoginAction, IUser } from "../../store/user/types";
+import { connect, MapStateToProps } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import { login } from "../../store/user/actions";
+import { IUsersCredentials, IUserState } from "../../store/user/types";
+import { AppState } from "../../store/rootReducer";
+import { AnyAction } from "redux";
 
 const Copyright = (): JSX.Element => {
   return (
@@ -52,30 +57,51 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: "#fff",
+  },
 }));
 
-interface IDispatchProps {
-  loginAsync: (credentials: IUsersCredentials) => Promise<ILoginAction>;
+interface IStateProps {
+  user: IUserState;
 }
 
-type ISignInProps = IDispatchProps;
+interface IDispatchProps {
+  loginAsync: (credentials: IUsersCredentials) => Promise<void>;
+}
 
-const SignInScreen: React.FC<ISignInProps> = (props: ISignInProps) => {
+type ISignInProps = IDispatchProps & IStateProps;
+
+const SignInScreen: React.FC<ISignInProps> = ({
+  loginAsync,
+  user,
+}: ISignInProps) => {
   const classes = useStyles();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [open, setOpen] = useState<boolean>(false);
 
-  const login = async (e: React.FormEvent<HTMLFormElement>) => {
+  const unmounted = useRef<boolean>(false);
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
+
+  const login = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const credentials: IUsersCredentials = {
-        email,
-        password,
-      };
-      await props.loginAsync(credentials);
-    } catch (error) {
-      console.log(error);
-    }
+    setOpen(!open);
+
+    const credentials: IUsersCredentials = {
+      email,
+      password,
+    };
+    loginAsync(credentials).then(() => {
+      if (!unmounted.current) {
+        setOpen(false);
+      }
+    });
   };
 
   return (
@@ -119,6 +145,9 @@ const SignInScreen: React.FC<ISignInProps> = (props: ISignInProps) => {
               setPassword(e.target.value)
             }
           />
+          {user.error !== undefined && (
+            <Alert severity="error">{user.error}</Alert>
+          )}
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
@@ -132,6 +161,9 @@ const SignInScreen: React.FC<ISignInProps> = (props: ISignInProps) => {
           >
             Sign In
           </Button>
+          <Backdrop className={classes.backdrop} open={open}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -153,8 +185,14 @@ const SignInScreen: React.FC<ISignInProps> = (props: ISignInProps) => {
   );
 };
 
+const mapStateToProps: MapStateToProps<IStateProps, {}, AppState> = (
+  state: AppState
+): IStateProps => ({
+  user: state.user,
+});
+
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IUser, IUsersCredentials, ILoginAction>
+  dispatch: ThunkDispatch<{}, {}, AnyAction>
 ): IDispatchProps => {
   return {
     loginAsync: (credentials: IUsersCredentials) =>
@@ -162,7 +200,7 @@ const mapDispatchToProps = (
   };
 };
 
-export default connect<{}, IDispatchProps, {}>(
-  undefined,
+export default connect<IStateProps, IDispatchProps, {}, AppState>(
+  mapStateToProps,
   mapDispatchToProps
 )(SignInScreen);

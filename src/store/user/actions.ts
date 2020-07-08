@@ -1,24 +1,35 @@
 import axios, { AxiosResponse } from "axios";
-import { Dispatch } from "redux";
-import { IUser, LOGIN, ILoginAction, IUsersCredentials } from "./types";
+import { Dispatch, AnyAction } from "redux";
+import {
+  IUserState,
+  IUser,
+  LOGIN,
+  ILoginAction,
+  IUsersCredentials,
+} from "./types";
 import { ActionCreator } from "redux";
 import { ThunkAction } from "redux-thunk";
 
 interface ServerResponseLogin {
-  data: IUser;
+  data?: IUser;
+  message?: string;
+  status: string;
 }
 
 export const login: ActionCreator<ThunkAction<
   // The type of the last action to be dispatched - will always be promise<T> for async actions
-  Promise<ILoginAction>,
+  Promise<void>,
   // The type for the data within the last action
-  IUser,
+  {},
   // The type of the parameter for the nested function
-  IUsersCredentials,
+  {},
   // The type of the last action to be dispatched
-  ILoginAction
+  AnyAction
 >> = ({ email, password }: IUsersCredentials) => {
-  return async (dispatch: Dispatch) => {
+  return async (dispatch: Dispatch): Promise<void> => {
+    let payload: IUserState = {
+      isAuth: false,
+    };
     try {
       const response: AxiosResponse<ServerResponseLogin> = await axios.post(
         "http://127.0.0.1:5000/api/users/login",
@@ -27,18 +38,31 @@ export const login: ActionCreator<ThunkAction<
           password,
         }
       );
-      const loginAction: ILoginAction = {
-        type: LOGIN,
-        payload: response.data.data,
-      };
-      return dispatch(loginAction);
+      if (response.data.status !== "error") {
+        payload = {
+          isAuth: true,
+          error: undefined,
+          userData: response.data.data,
+        };
+      } else {
+        payload = {
+          isAuth: false,
+          error: response.data.message,
+          userData: undefined,
+        };
+      }
     } catch (error) {
-      console.log(error);
+      payload = {
+        isAuth: false,
+        error: error,
+        userData: undefined,
+      };
+    } finally {
       const loginAction: ILoginAction = {
         type: LOGIN,
-        payload: undefined,
+        payload: payload,
       };
-      return dispatch(loginAction);
+      dispatch(loginAction);
     }
   };
 };

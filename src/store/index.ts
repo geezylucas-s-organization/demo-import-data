@@ -1,16 +1,14 @@
-import { createStore, combineReducers, applyMiddleware, compose } from "redux";
+import { createStore, applyMiddleware, compose } from "redux";
+import { persistStore } from "redux-persist";
 import ReduxThunk from "redux-thunk";
-
-import { userReducer } from "./user/reducers";
-
-const rootReducer = combineReducers({
-  user: userReducer,
-});
-
-export type AppState = ReturnType<typeof rootReducer>;
+import persistedReducer from "./rootReducer";
 
 export default () => {
-  const store = createStore(rootReducer, compose(applyMiddleware(ReduxThunk)));
+  const store = createStore(
+    persistedReducer,
+    compose(applyMiddleware(ReduxThunk))
+  );
+  const persistor = persistStore(store);
 
-  return store;
+  return { store, persistor };
 };

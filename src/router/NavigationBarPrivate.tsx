@@ -24,6 +24,12 @@ import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 
+import { connect } from "react-redux";
+import { ThunkDispatch } from "redux-thunk";
+import { logout } from "../store/rootReducer";
+import { AnyAction } from "redux";
+import { purge } from "../index";
+
 export const drawerWidth: number = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -69,10 +75,16 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 );
 
-interface INavBarPrivateProps extends RouteComponentProps {
+interface IDispatchProps {
+  logoutAsync: () => Promise<void>;
+}
+
+interface IPropsOwn extends RouteComponentProps {
   open: boolean;
   setOpen: (active: boolean) => void;
 }
+
+type INavBarPrivateProps = IDispatchProps & IPropsOwn;
 
 const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
   props: INavBarPrivateProps
@@ -90,6 +102,15 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
 
   const activeRoute = (routeName: string): boolean => {
     return props.location.pathname === routeName ? true : false;
+  };
+
+  const logout = async () => {
+    try {
+      await props.logoutAsync();
+      await purge();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -113,7 +134,9 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
           <Typography variant="h6" className={classes.title}>
             Faccloud
           </Typography>
-          <Button color="inherit">Cerrar sesión</Button>
+          <Button color="inherit" onClick={logout}>
+            Cerrar sesión
+          </Button>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -152,4 +175,17 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
   );
 };
 
-export default withRouter(NavigationBarPrivate);
+const mapDispatchToProps = (
+  dispatch: ThunkDispatch<{}, {}, AnyAction>
+): IDispatchProps => {
+  return {
+    logoutAsync: () => dispatch(logout()),
+  };
+};
+
+export default withRouter(
+  connect<{}, IDispatchProps, {}>(
+    null,
+    mapDispatchToProps
+  )(NavigationBarPrivate)
+);

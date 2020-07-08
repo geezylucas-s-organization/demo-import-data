@@ -15,7 +15,7 @@ import NavigationBarPublic from "./router/NavigationBarPublic";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 
 import { connect, MapStateToProps } from "react-redux";
-import { AppState } from "./store";
+import { AppState } from "./store/rootReducer";
 import { IUserState } from "./store/user/types";
 
 const useStyles = makeStyles((theme: Theme) =>

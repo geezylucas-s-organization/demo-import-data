@@ -4,6 +4,7 @@ import { IUserState, UserActionTypes, LOGIN } from "./types";
 const initialState: IUserState = {
   isAuth: false,
   userData: undefined,
+  error: undefined,
 };
 
 export const userReducer: Reducer<IUserState, UserActionTypes> = (
@@ -12,11 +13,7 @@ export const userReducer: Reducer<IUserState, UserActionTypes> = (
 ): IUserState => {
   switch (action.type) {
     case LOGIN:
-      if (action.payload !== undefined) {
-        return { ...action.payload, isAuth: true };
-      } else {
-        return { isAuth: false };
-      }
+      return { ...state, ...action.payload };
     default:
       return state;
   }

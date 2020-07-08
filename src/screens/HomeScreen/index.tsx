@@ -7,9 +7,9 @@ const HomeScreen: React.FC = () => {
   return (
     <Container component="main">
       <CssBaseline />
-      <h1>Hello world</h1>
+      <h1>Mi cuenta</h1>
     </Container>
   );
 };
 
-export default connect<{}, {}, {}>(undefined, {})(HomeScreen);
+export default connect<{}, {}, {}>(null, {})(HomeScreen);
