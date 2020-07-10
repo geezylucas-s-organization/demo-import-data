@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import {
   Typography,
@@ -13,10 +13,10 @@ import {
   Modal,
   Fade,
   Backdrop,
+  Container,
 } from "@material-ui/core";
 import Icon from "@material-ui/core/Icon";
 import { useDropzone } from "react-dropzone";
-import Iframe from "react-iframe";
 import axios, { AxiosResponse } from "axios";
 
 type Base64 = string | ArrayBuffer | null;
@@ -136,30 +136,12 @@ const ImportDataScreen: React.FC = () => {
   };
 
   return (
-    <Fragment>
-      <Grid
-        container
-        spacing={3}
-        direction="row"
-        justify="center"
-        alignItems="center"
-      >
-        <Grid item lg={10} md={10} sm={10}>
-          <h1>Importar datos</h1>
+    <Container>
+      <Grid container spacing={3}>
+        <Grid item>
+          <h1>Cargar paquetes de XML</h1>
         </Grid>
-        <Grid item lg={10} md={10} sm={10}>
-          <Card>
-            <CardContent>
-              <Iframe
-                url="https://portalcfdi.facturaelectronica.sat.gob.mx/"
-                width="100%"
-                height="500px"
-                position="relative"
-              />
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item lg={10} md={10} sm={10}>
+        <Grid item lg={12} md={12} sm={12}>
           <Card>
             <CardContent>
               <h4>Seleccionar únicamente los archivos ZIP</h4>
@@ -170,7 +152,7 @@ const ImportDataScreen: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item lg={10} md={10} sm={10}>
+        <Grid item lg={12} md={12} sm={12}>
           <Card>
             <CardContent>
               <Typography
@@ -192,49 +174,50 @@ const ImportDataScreen: React.FC = () => {
                   </ListItem>
                 ))}
               </List>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                onClick={sendData}
-                endIcon={<Icon>send</Icon>}
-                fullWidth={true}
-                disabled={disabled}
-              >
-                Importar
-              </Button>
-              <Modal
-                aria-labelledby="transition-modal-title"
-                aria-describedby="transition-modal-description"
-                className={classes.modal}
-                open={open}
-                onClose={() => setOpen(false)}
-                closeAfterTransition
-                BackdropComponent={Backdrop}
-                BackdropProps={{
-                  timeout: 500,
-                }}
-              >
-                <Fade in={open}>
-                  <div className={classes.paper}>
-                    <h2 id="transition-modal-title">Importar archivio ZIP</h2>
-                    <p id="transition-modal-description">
-                      Se insertaron {numCfdis} archivos XML correctamente.
-                    </p>
-                  </div>
-                </Fade>
-              </Modal>
             </CardContent>
           </Card>
+          <br />
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={sendData}
+            endIcon={<Icon>cloud</Icon>}
+            fullWidth={true}
+            disabled={disabled}
+          >
+            Cargar a la nube
+          </Button>
           <br />
           {disabled && (
             <div className={classes.loading}>
               <LinearProgress />
             </div>
           )}
+          <Modal
+            aria-labelledby="transition-modal-title"
+            aria-describedby="transition-modal-description"
+            className={classes.modal}
+            open={open}
+            onClose={() => setOpen(false)}
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            BackdropProps={{
+              timeout: 500,
+            }}
+          >
+            <Fade in={open}>
+              <div className={classes.paper}>
+                <h2 id="transition-modal-title">Importar archivio ZIP</h2>
+                <p id="transition-modal-description">
+                  Se insertaron {numCfdis} archivos XML correctamente.
+                </p>
+              </div>
+            </Fade>
+          </Modal>
         </Grid>
       </Grid>
-    </Fragment>
+    </Container>
   );
 };
 

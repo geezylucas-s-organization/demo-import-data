@@ -1,10 +1,10 @@
 import { combineReducers, Reducer, AnyAction, ActionCreator } from "redux";
 import { userReducer } from "./user/reducers";
-import { Dispatch } from "redux";
 import { ILogoutAction, LOGOUT } from "./user/types";
-import { ThunkAction } from "redux-thunk";
+import { ThunkAction, ThunkDispatch } from "redux-thunk";
 import { persistReducer, createMigrate } from "redux-persist";
 import storage from "redux-persist/lib/storage";
+import { createBlacklistFilter } from "redux-persist-transform-filter";
 
 export type AppState = ReturnType<typeof combinedReducers>;
 
@@ -12,13 +12,13 @@ export const logout: ActionCreator<ThunkAction<
   Promise<void>,
   {},
   {},
-  AnyAction
+  ILogoutAction
 >> = () => {
-  return async (dispatch: Dispatch): Promise<void> => {
-    const logouAction: ILogoutAction = {
+  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    const logoutAction: ILogoutAction = {
       type: LOGOUT,
     };
-    dispatch(logouAction);
+    dispatch(logoutAction);
   };
 };
 
@@ -34,25 +34,22 @@ const rootReducer: Reducer<AppState, AnyAction> = (
   }
 };
 
+const saveSubsetFilter = createBlacklistFilter("user", ["error"]);
+
 const migrations = {};
 
 const persistConfig = {
   key: "root",
   version: -1,
   storage,
+  whitelist: ["user"],
+  transforms: [saveSubsetFilter],
   debug: true,
-  blacklist: ["user"],
   migrate: createMigrate(migrations, { debug: true }),
 };
 
-const userPersistConfig = {
-  key: "user",
-  storage,
-  blacklist: ["error"],
-};
-
 const combinedReducers = combineReducers({
-  user: persistReducer(userPersistConfig, userReducer),
+  user: userReducer,
 });
 
 export default persistReducer(persistConfig, rootReducer);

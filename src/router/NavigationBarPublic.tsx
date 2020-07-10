@@ -1,14 +1,11 @@
-import React from "react";
+import React, { Fragment } from "react";
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
-import { AppBar, Toolbar, Typography } from "@material-ui/core";
+import { AppBar, Toolbar, Typography, CssBaseline } from "@material-ui/core";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     appBar: {
-      transition: theme.transitions.create(["margin", "width"], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
+      zIndex: theme.zIndex.drawer + 1,
     },
     title: {
       flexGrow: 1,
@@ -19,13 +16,16 @@ const useStyles = makeStyles((theme: Theme) =>
 const NavigationBarPublic: React.FC = () => {
   const classes = useStyles();
   return (
-    <AppBar position="fixed" className={classes.appBar}>
-      <Toolbar>
-        <Typography variant="h6" className={classes.title}>
-          Faccloud
-        </Typography>
-      </Toolbar>
-    </AppBar>
+    <Fragment>
+      <CssBaseline />
+      <AppBar position="fixed" className={classes.appBar}>
+        <Toolbar>
+          <Typography variant="h6" className={classes.title}>
+            Faccloud
+          </Typography>
+        </Toolbar>
+      </AppBar>
+    </Fragment>
   );
 };
 

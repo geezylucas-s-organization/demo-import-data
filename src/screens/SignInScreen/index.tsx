@@ -3,7 +3,6 @@ import { NavLink } from "react-router-dom";
 import {
   Avatar,
   Button,
-  CssBaseline,
   TextField,
   FormControlLabel,
   Checkbox,
@@ -22,9 +21,8 @@ import { makeStyles } from "@material-ui/core/styles";
 import { connect, MapStateToProps } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { login } from "../../store/user/actions";
-import { IUsersCredentials, IUserState } from "../../store/user/types";
+import { IUserState, ILoginAction } from "../../store/user/types";
 import { AppState } from "../../store/rootReducer";
-import { AnyAction } from "redux";
 
 const Copyright = (): JSX.Element => {
   return (
@@ -68,7 +66,7 @@ interface IStateProps {
 }
 
 interface IDispatchProps {
-  loginAsync: (credentials: IUsersCredentials) => Promise<void>;
+  loginAsync: (email: string, password: string) => Promise<void>;
 }
 
 type ISignInProps = IDispatchProps & IStateProps;
@@ -92,12 +90,7 @@ const SignInScreen: React.FC<ISignInProps> = ({
   const login = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setOpen(!open);
-
-    const credentials: IUsersCredentials = {
-      email,
-      password,
-    };
-    loginAsync(credentials).then(() => {
+    loginAsync(email, password).then(() => {
       if (!unmounted.current) {
         setOpen(false);
       }
@@ -106,7 +99,6 @@ const SignInScreen: React.FC<ISignInProps> = ({
 
   return (
     <Container maxWidth="xs">
-      <CssBaseline />
       <div className={classes.paper}>
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
@@ -192,11 +184,10 @@ const mapStateToProps: MapStateToProps<IStateProps, {}, AppState> = (
 });
 
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<{}, {}, AnyAction>
+  dispatch: ThunkDispatch<IUserState, {}, ILoginAction>
 ): IDispatchProps => {
   return {
-    loginAsync: (credentials: IUsersCredentials) =>
-      dispatch(login(credentials)),
+    loginAsync: (email, password) => dispatch(login(email, password)),
   };
 };
 

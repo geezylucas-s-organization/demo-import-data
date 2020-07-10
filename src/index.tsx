@@ -10,8 +10,6 @@ import { PersistGate } from "redux-persist/integration/react";
 
 const { store, persistor } = configureStore();
 
-export const purge = async () => await persistor.purge();
-
 const Root = () => (
   <Provider store={store}>
     <PersistGate persistor={persistor}>

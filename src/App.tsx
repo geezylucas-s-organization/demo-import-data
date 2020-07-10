@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import clsx from "clsx";
+import React from "react";
 import {
   Switch,
   Route,
@@ -8,63 +7,32 @@ import {
   RouteComponentProps,
 } from "react-router-dom";
 import { RoutesPrivate, RoutesPublic, RouteType } from "./router/Routes";
-import NavigationBarPrivate, {
-  drawerWidth,
-} from "./router/NavigationBarPrivate";
+import NavigationBarPrivate from "./router/NavigationBarPrivate";
 import NavigationBarPublic from "./router/NavigationBarPublic";
 import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
 
 import { connect, MapStateToProps } from "react-redux";
 import { AppState } from "./store/rootReducer";
-import { IUserState } from "./store/user/types";
+import { Toolbar } from "@material-ui/core";
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
       display: "flex",
     },
-    contentPublic: {
-      flexGrow: 1,
-      padding: theme.spacing(3),
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-    },
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      marginLeft: -drawerWidth,
-    },
-    contentShift: {
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      marginLeft: 0,
-    },
-    drawerHeader: {
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0, 1),
-      // necessary for content to be below app bar
-      ...theme.mixins.toolbar,
-      justifyContent: "flex-end",
     },
   })
 );
 
 interface IAppStateProps {
-  user: IUserState;
+  isAuth: boolean;
 }
 
-const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
+const App: React.FC<IAppStateProps> = ({ isAuth }: IAppStateProps) => {
   const classes = useStyles();
-  const [open, setOpen] = useState<boolean>(false);
 
   const PrivateRoute: React.FC<RouteProps> = ({
     component,
@@ -73,7 +41,7 @@ const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
     <Route
       {...rest}
       render={(props: RouteComponentProps) =>
-        user.isAuth ? (
+        isAuth ? (
           <Route {...props} component={component} />
         ) : (
           <Redirect to="/signin" />
@@ -89,7 +57,7 @@ const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
     <Route
       {...rest}
       render={(props: RouteComponentProps) =>
-        !user.isAuth ? (
+        !isAuth ? (
           <Route {...props} component={component} />
         ) : (
           <Redirect to="/" />
@@ -98,15 +66,15 @@ const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
     />
   );
 
-  if (!user.isAuth) {
+  if (!isAuth) {
     return (
       <div className={classes.root}>
         <NavigationBarPublic />
         <Switch>
           {RoutesPublic.map((route: RouteType) => (
             <Route exact path={route.path} key={route.path}>
-              <main className={classes.contentPublic}>
-                <div className={classes.drawerHeader} />
+              <main className={classes.content}>
+                <Toolbar />
                 <PublicRoute component={route.component} path={route.path} />
               </main>
             </Route>
@@ -125,16 +93,12 @@ const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
 
   return (
     <div className={classes.root}>
-      <NavigationBarPrivate open={open} setOpen={setOpen} />
+      <NavigationBarPrivate />
       <Switch>
         {RoutesPrivate.map((route: RouteType) => (
           <Route exact path={route.path} key={route.path}>
-            <main
-              className={clsx(classes.content, {
-                [classes.contentShift]: open,
-              })}
-            >
-              <div className={classes.drawerHeader} />
+            <main className={classes.content}>
+              <Toolbar />
               <PrivateRoute component={route.component} path={route.path} />
             </main>
           </Route>
@@ -154,7 +118,7 @@ const App: React.FC<IAppStateProps> = ({ user }: IAppStateProps) => {
 const mapStateToProps: MapStateToProps<IAppStateProps, {}, AppState> = (
   state: AppState
 ): IAppStateProps => ({
-  user: state.user,
+  isAuth: state.user.isAuth,
 });
 
 export default connect<IAppStateProps, {}, {}, AppState>(

@@ -3,6 +3,7 @@ import {
   SignUpScreen,
   HomeScreen,
   ImportDataScreen,
+  AccountScreen,
 } from "../screens";
 
 export type RouteType = {
@@ -19,8 +20,13 @@ export const RoutesPrivate: RouteType[] = [
   },
   {
     path: "/importdata",
-    sidebarName: "Importar paquete XML",
+    sidebarName: "Cargar paquetes de XML",
     component: ImportDataScreen,
+  },
+  {
+    path: "/myaccount",
+    sidebarName: "Mi Cuenta",
+    component: AccountScreen,
   },
 ];
 

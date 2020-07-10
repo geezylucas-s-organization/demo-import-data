@@ -1,58 +1,32 @@
 import React, { Fragment } from "react";
-import clsx from "clsx";
 import { Link, withRouter, RouteComponentProps } from "react-router-dom";
 import { RoutesPrivate, RouteType } from "./Routes";
-import {
-  createStyles,
-  makeStyles,
-  Theme,
-  useTheme,
-} from "@material-ui/core/styles";
+import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
   Drawer,
   List,
   ListItem,
   ListItemText,
-  Divider,
   Button,
+  CssBaseline,
+  ListItemIcon,
 } from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
+import InboxIcon from "@material-ui/icons/MoveToInbox";
 
 import { connect } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import { logout } from "../store/rootReducer";
 import { AnyAction } from "redux";
-import { purge } from "../index";
 
-export const drawerWidth: number = 240;
+const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     appBar: {
-      transition: theme.transitions.create(["margin", "width"], {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-    },
-    appBarShift: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
-      transition: theme.transitions.create(["margin", "width"], {
-        easing: theme.transitions.easing.easeOut,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    hide: {
-      display: "none",
+      zIndex: theme.zIndex.drawer + 1,
     },
     drawer: {
       width: drawerWidth,
@@ -61,13 +35,8 @@ const useStyles = makeStyles((theme: Theme) =>
     drawerPaper: {
       width: drawerWidth,
     },
-    drawerHeader: {
-      display: "flex",
-      alignItems: "center",
-      padding: theme.spacing(0, 1),
-      // necessary for content to be below app bar
-      ...theme.mixins.toolbar,
-      justifyContent: "flex-end",
+    drawerContainer: {
+      overflow: "auto",
     },
     title: {
       flexGrow: 1,
@@ -79,35 +48,23 @@ interface IDispatchProps {
   logoutAsync: () => Promise<void>;
 }
 
-interface IPropsOwn extends RouteComponentProps {
-  open: boolean;
-  setOpen: (active: boolean) => void;
-}
+interface IPropsOwn extends RouteComponentProps {}
 
 type INavBarPrivateProps = IDispatchProps & IPropsOwn;
 
-const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
-  props: INavBarPrivateProps
-) => {
+const NavigationBarPrivate: React.FC<INavBarPrivateProps> = ({
+  location,
+  logoutAsync,
+}: INavBarPrivateProps) => {
   const classes = useStyles();
-  const theme = useTheme<Theme>();
-
-  const handleDrawerOpen = (): void => {
-    props.setOpen(true);
-  };
-
-  const handleDrawerClose = (): void => {
-    props.setOpen(false);
-  };
 
   const activeRoute = (routeName: string): boolean => {
-    return props.location.pathname === routeName ? true : false;
+    return location.pathname === routeName ? true : false;
   };
 
   const logout = async () => {
     try {
-      await props.logoutAsync();
-      await purge();
+      await logoutAsync();
     } catch (error) {
       console.log(error);
     }
@@ -115,23 +72,10 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
 
   return (
     <Fragment>
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.appBarShift]: props.open,
-        })}
-      >
+      <CssBaseline />
+      <AppBar position="fixed" className={classes.appBar}>
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={handleDrawerOpen}
-            edge="start"
-            className={clsx(classes.menuButton, props.open && classes.hide)}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" className={classes.title}>
+          <Typography variant="h6" className={classes.title} noWrap>
             Faccloud
           </Typography>
           <Button color="inherit" onClick={logout}>
@@ -141,35 +85,30 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = (
       </AppBar>
       <Drawer
         className={classes.drawer}
-        variant="persistent"
-        anchor="left"
-        open={props.open}
+        variant="permanent"
         classes={{
           paper: classes.drawerPaper,
         }}
       >
-        <div className={classes.drawerHeader}>
-          <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronLeftIcon />
-            ) : (
-              <ChevronRightIcon />
-            )}
-          </IconButton>
+        <Toolbar />
+        <div className={classes.drawerContainer}>
+          <List>
+            {RoutesPrivate.map((prop: RouteType, index: number) => (
+              <ListItem
+                button
+                component={Link}
+                to={prop.path}
+                key={index}
+                selected={activeRoute(prop.path)}
+              >
+                <ListItemIcon>
+                  <InboxIcon />
+                </ListItemIcon>
+                <ListItemText primary={prop.sidebarName} />
+              </ListItem>
+            ))}
+          </List>
         </div>
-        <Divider />
-        <List>
-          {RoutesPrivate.map((prop: RouteType, index: number) => (
-            <ListItem
-              component={Link}
-              to={prop.path}
-              key={index}
-              selected={activeRoute(prop.path)}
-            >
-              <ListItemText primary={prop.sidebarName} />
-            </ListItem>
-          ))}
-        </List>
       </Drawer>
     </Fragment>
   );
@@ -187,5 +126,5 @@ export default withRouter(
   connect<{}, IDispatchProps, {}>(
     null,
     mapDispatchToProps
-  )(NavigationBarPrivate)
+  )(React.memo(NavigationBarPrivate))
 );
