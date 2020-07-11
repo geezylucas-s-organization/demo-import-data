@@ -1,12 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import {
   Avatar,
   Button,
   CssBaseline,
   TextField,
-  FormControlLabel,
-  Checkbox,
   Link,
   Grid,
   Box,
@@ -15,19 +13,8 @@ import {
 } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import { makeStyles } from "@material-ui/core/styles";
-
-function Copyright() {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import Copyright from "../../components/Copyright";
+import { IUserSingUp } from "../../store/user/types";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -51,6 +38,13 @@ const useStyles = makeStyles((theme) => ({
 
 const SignUpScreen: React.FC = () => {
   const classes = useStyles();
+  const [form, setForm] = useState<IUserSingUp>({
+    name: "",
+    lastname: "",
+    rfc: "",
+    email: "",
+    password: "",
+  });
 
   return (
     <Container maxWidth="xs">
@@ -60,60 +54,85 @@ const SignUpScreen: React.FC = () => {
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign up
+          Crear cuenta
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <TextField
+                value={form.name}
                 autoComplete="fname"
                 name="firstName"
                 variant="outlined"
                 required
                 fullWidth
                 id="firstName"
-                label="First Name"
+                label="Nombres"
                 autoFocus
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm({ ...form, name: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
+                value={form.lastname}
                 variant="outlined"
                 required
                 fullWidth
                 id="lastName"
-                label="Last Name"
+                label="Apellidos"
                 name="lastName"
                 autoComplete="lname"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm({ ...form, lastname: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
+                value={form.rfc}
+                variant="outlined"
+                required
+                fullWidth
+                id="rfc"
+                label="RFC"
+                name="rfc"
+                autoComplete="RFC"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm({ ...form, rfc: e.target.value })
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                value={form.email}
                 variant="outlined"
                 required
                 fullWidth
                 id="email"
-                label="Email Address"
+                label="Email"
                 name="email"
                 autoComplete="email"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm({ ...form, email: e.target.value })
+                }
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
+                value={form.password}
                 variant="outlined"
                 required
                 fullWidth
                 name="password"
-                label="Password"
+                label="Contraseña"
                 type="password"
                 id="password"
                 autoComplete="current-password"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setForm({ ...form, password: e.target.value })
+                }
               />
             </Grid>
           </Grid>
@@ -124,12 +143,12 @@ const SignUpScreen: React.FC = () => {
             color="primary"
             className={classes.submit}
           >
-            Sign Up
+            Crear
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
               <Link component={NavLink} to="/signin" variant="body2">
-                Already have an account? Sign in
+                ¿Ya tiene una cuenta? Inicia sesión
               </Link>
             </Grid>
           </Grid>

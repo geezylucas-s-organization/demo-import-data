@@ -1,5 +1,13 @@
 import { Action } from "redux";
 
+export interface IUserSingUp {
+  name: string;
+  lastname: string;
+  email: string;
+  rfc: string;
+  password: string;
+}
+
 // Describing the shape of the users's slice of state
 export interface IUserData {
   name: string;

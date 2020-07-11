@@ -23,19 +23,7 @@ import { login } from "../../store/user/actions";
 import { IUserState } from "../../store/user/types";
 import { AppState } from "../../store/rootReducer";
 import { ThunkDispatch } from "redux-thunk";
-
-const Copyright = (): JSX.Element => {
-  return (
-    <Typography variant="body2" color="textSecondary" align="center">
-      {"Copyright © "}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-};
+import Copyright from "../../components/Copyright";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -104,7 +92,7 @@ const SignInScreen: React.FC<ISignInProps> = ({
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
-          Sign in
+          Iniciar sesión
         </Typography>
         <form className={classes.form} onSubmit={login} noValidate>
           <TextField
@@ -114,7 +102,7 @@ const SignInScreen: React.FC<ISignInProps> = ({
             required
             fullWidth
             id="email"
-            label="Email Address"
+            label="Email"
             name="email"
             autoComplete="email"
             autoFocus
@@ -129,7 +117,7 @@ const SignInScreen: React.FC<ISignInProps> = ({
             required
             fullWidth
             name="password"
-            label="Password"
+            label="Contraseña"
             type="password"
             id="password"
             autoComplete="current-password"
@@ -151,7 +139,7 @@ const SignInScreen: React.FC<ISignInProps> = ({
             color="primary"
             className={classes.submit}
           >
-            Sign In
+            Iniciar sesión
           </Button>
           <Backdrop className={classes.backdrop} open={open}>
             <CircularProgress color="inherit" />
@@ -159,12 +147,12 @@ const SignInScreen: React.FC<ISignInProps> = ({
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
-                Forgot password?
+                ¿Olvidaste tu contraseña?
               </Link>
             </Grid>
             <Grid item>
               <Link component={NavLink} to="/signup" variant="body2">
-                {"Don't have an account? Sign Up"}
+                {"¿No tiene una cuenta? Crea una"}
               </Link>
             </Grid>
           </Grid>

@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosResponse, AxiosError } from "axios";
 import { AnyAction, Dispatch } from "redux";
 import {
   IUserState,
@@ -10,6 +10,11 @@ import {
 } from "./types";
 import { ThunkDispatch } from "redux-thunk";
 import { logout, AppThunk, AppState } from "../rootReducer";
+
+interface IServerResponseError {
+  message: string;
+  status: string;
+}
 
 interface IServerResponseLogin {
   data: string;
@@ -37,22 +42,27 @@ export const login = (email: string, password: string): AppThunk => {
           password,
         }
       );
-      if (response.data.status !== "error") {
-        payload = {
-          isAuth: true,
-          token: response.data.data,
-        };
-      } else {
-        payload = {
-          isAuth: false,
-          error: response.data.message,
-        };
-      }
-    } catch (error) {
       payload = {
-        isAuth: false,
-        error: error,
+        isAuth: true,
+        token: response.data.data,
       };
+    } catch (_error) {
+      const error: AxiosError<IServerResponseError> = _error;
+      switch (error.response!.status) {
+        case 400:
+        case 401:
+          payload = {
+            isAuth: false,
+            error: error.response!.data.message,
+          };
+          break;
+        default:
+          payload = {
+            isAuth: false,
+            error: "Ha ocurrido un error inesperado",
+          };
+          break;
+      }
     } finally {
       const loginAction: ILoginAction = {
         type: LOGIN,
