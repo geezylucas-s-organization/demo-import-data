@@ -17,12 +17,12 @@ import {
 import Alert from "@material-ui/lab/Alert";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import { makeStyles } from "@material-ui/core/styles";
-
 import { connect, MapStateToProps } from "react-redux";
-import { ThunkDispatch } from "redux-thunk";
+import { AnyAction } from "redux";
 import { login } from "../../store/user/actions";
-import { IUserState, ILoginAction } from "../../store/user/types";
+import { IUserState } from "../../store/user/types";
 import { AppState } from "../../store/rootReducer";
+import { ThunkDispatch } from "redux-thunk";
 
 const Copyright = (): JSX.Element => {
   return (
@@ -184,7 +184,7 @@ const mapStateToProps: MapStateToProps<IStateProps, {}, AppState> = (
 });
 
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IUserState, {}, ILoginAction>
+  dispatch: ThunkDispatch<AppState, null, AnyAction>
 ): IDispatchProps => {
   return {
     loginAsync: (email, password) => dispatch(login(email, password)),

@@ -1,10 +1,10 @@
 import React, { useEffect } from "react";
 import { ThunkDispatch } from "redux-thunk";
-import { IGetUserAction, IUserState } from "../../store/user/types";
 import { getUser } from "../../store/user/actions";
 import { AppState } from "../../store/rootReducer";
 import { connect, MapStateToProps } from "react-redux";
 import { Container } from "@material-ui/core";
+import { AnyAction } from "redux";
 
 interface IDispatchProps {
   getUserAsync: (token: string) => Promise<void>;
@@ -38,7 +38,7 @@ const mapStateToProps: MapStateToProps<IStateProps, {}, AppState> = (
 });
 
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<IUserState, {}, IGetUserAction>
+  dispatch: ThunkDispatch<AppState, null, AnyAction>
 ): IDispatchProps => {
   return {
     getUserAsync: (token: string) => dispatch(getUser(token)),

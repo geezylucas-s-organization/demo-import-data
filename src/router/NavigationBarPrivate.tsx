@@ -15,10 +15,9 @@ import {
   ListItemIcon,
 } from "@material-ui/core";
 import InboxIcon from "@material-ui/icons/MoveToInbox";
-
 import { connect } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
-import { logout } from "../store/rootReducer";
+import { logout, AppState } from "../store/rootReducer";
 import { AnyAction } from "redux";
 
 const drawerWidth = 240;
@@ -115,7 +114,7 @@ const NavigationBarPrivate: React.FC<INavBarPrivateProps> = ({
 };
 
 const mapDispatchToProps = (
-  dispatch: ThunkDispatch<{}, {}, AnyAction>
+  dispatch: ThunkDispatch<AppState, null, AnyAction>
 ): IDispatchProps => {
   return {
     logoutAsync: () => dispatch(logout()),

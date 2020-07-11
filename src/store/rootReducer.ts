@@ -1,20 +1,20 @@
-import { combineReducers, Reducer, AnyAction, ActionCreator } from "redux";
+import { combineReducers, Reducer, AnyAction, Dispatch } from "redux";
 import { userReducer } from "./user/reducers";
-import { ILogoutAction, LOGOUT } from "./user/types";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
+import { ILogoutAction, LOGOUT, IUserState } from "./user/types";
+import { ThunkAction } from "redux-thunk";
 import { persistReducer, createMigrate } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { createBlacklistFilter } from "redux-persist-transform-filter";
 
-export type AppState = ReturnType<typeof combinedReducers>;
+// The top-level state object
+export interface AppState {
+  user: IUserState;
+}
 
-export const logout: ActionCreator<ThunkAction<
-  Promise<void>,
-  {},
-  {},
-  ILogoutAction
->> = () => {
-  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+export type AppThunk = ThunkAction<Promise<void>, AppState, null, AnyAction>;
+
+export const logout = (): AppThunk => {
+  return async (dispatch: Dispatch): Promise<void> => {
     const logoutAction: ILogoutAction = {
       type: LOGOUT,
     };
@@ -48,8 +48,8 @@ const persistConfig = {
   migrate: createMigrate(migrations, { debug: true }),
 };
 
-const combinedReducers = combineReducers({
+const combinedReducers: Reducer<AppState> = combineReducers<AppState>({
   user: userReducer,
 });
 
-export default persistReducer(persistConfig, rootReducer);
+export default persistReducer<AppState>(persistConfig, rootReducer);

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { AnyAction } from "redux";
+import { AnyAction, Dispatch } from "redux";
 import {
   IUserState,
   LOGIN,
@@ -8,9 +8,8 @@ import {
   IGetUserAction,
   GET_USER,
 } from "./types";
-import { ActionCreator } from "redux";
-import { ThunkAction, ThunkDispatch } from "redux-thunk";
-import { logout } from "../rootReducer";
+import { ThunkDispatch } from "redux-thunk";
+import { logout, AppThunk, AppState } from "../rootReducer";
 
 interface IServerResponseLogin {
   data: string;
@@ -22,17 +21,8 @@ interface IServerResponseGetUser {
   data: IUserData;
 }
 
-export const login: ActionCreator<ThunkAction<
-  // The type of the last action to be dispatched - will always be promise<T> for async actions
-  Promise<void>,
-  // The type for the data within the last action
-  IUserState,
-  // The type of the parameter for the nested function
-  {},
-  // The type of the last action to be dispatched
-  ILoginAction
->> = (email: string, password: string) => {
-  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+export const login = (email: string, password: string): AppThunk => {
+  return async (dispatch: Dispatch): Promise<void> => {
     let payload: IUserState = {
       isAuth: false,
       token: undefined,
@@ -73,17 +63,10 @@ export const login: ActionCreator<ThunkAction<
   };
 };
 
-export const getUser: ActionCreator<ThunkAction<
-  // The type of the last action to be dispatched - will always be promise<T> for async actions
-  Promise<void>,
-  // The type for the data within the last action
-  IUserState,
-  // The type of the parameter for the nested function
-  {},
-  // The type of the last action to be dispatched
-  IGetUserAction
->> = (token: string) => {
-  return async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+export const getUser = (token: string): AppThunk => {
+  return async (
+    dispatch: ThunkDispatch<AppState, null, AnyAction>
+  ): Promise<void> => {
     try {
       const response: AxiosResponse<IServerResponseGetUser> = await axios.get(
         "http://127.0.0.1:5000/api/users/",
